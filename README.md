@@ -1,9 +1,6 @@
 # nrscrapy
-An example of how to monitor your Scrapy app with the New Relic agent.
 
-The New Relic Python agent does not support the Scrapy web scraping framework. This project shows a trivial example of how you can monitor your Scrapy application making use of the [Python Agent API](https://docs.newrelic.com/docs/agents/python-agent/python-agent-api). 
-
-Consider the following example:
+The New Relic Python agent does not support the Scrapy web scraping framework. This project shows a trivial example of how you can monitor your Scrapy application making use of the [Python Agent API](https://docs.newrelic.com/docs/agents/python-agent/python-agent-api). Consider the following example Spider:
 
 ``` python
 import scrapy
@@ -27,7 +24,7 @@ class QuotesSpider(scrapy.Spider):
             yield response.follow(a, callback=self.parse)
 ```
 
-To monitor this spider using New Relic, we just need to add three additional lines of code!
+To monitor this Spider using New Relic, we just need to add three additional lines of code!
 
 ``` python
 
