@@ -1,6 +1,6 @@
 # nrscrapy
 
-The New Relic Python agent does not support the Scrapy web scraping framework. This project shows a trivial example of how you can monitor your Scrapy application making use of the [Python Agent API](https://docs.newrelic.com/docs/agents/python-agent/python-agent-api). Consider the following example Spider:
+The New Relic Python agent does not support the Scrapy web scraping framework. This project shows a trivial example of how you can monitor your Scrapy application with New Relic by making use of the [Python Agent API](https://docs.newrelic.com/docs/agents/python-agent/python-agent-api). Consider the following example Spider:
 
 ``` python
 import scrapy
@@ -60,7 +60,9 @@ The `@newrelic.agent.background_task()` decorator is used when you want to instr
 
 ## New Relic Extension Example
 
-The extensions framework built into Scrapy provides a mechanism for inserting your own custom functionality into Scrapy. Extensions are just regular classes that are instantiated at Scrapy startup, when extensions are initialized. This project includes an example extension that collects some stats and records a New Relic Custom Event that can be queried using New Relic Insights.
+The extensions framework built into Scrapy provides a mechanism for inserting your own custom functionality into Scrapy. Extensions are just regular classes that are instantiated at Scrapy startup, when extensions are initialized. 
+
+This project includes an example extension that collects some stats and records a New Relic Custom Event that can be queried using New Relic Insights.
 
 ``` python
 import newrelic.agent
