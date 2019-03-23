@@ -1,6 +1,10 @@
-# nrscrapy
+# Monitoring Scrapy using the New Relic Python Agent API
 
-The New Relic Python agent does not support the Scrapy web scraping framework. This project shows a trivial example of how you can monitor your Scrapy application with New Relic by making use of the [Python Agent API](https://docs.newrelic.com/docs/agents/python-agent/python-agent-api). Consider the following example Spider:
+[Scrapy](https://scrapy.org) is web scraping framework that is unsupported by the New Relic Python agent. We occasionally receive support tickets asking to help with instrumenting a Scrapy application. The response we give to our customers is that it is unsupported but they can use custom instrumentation to monitor their Scrapy application. Recently I worked on a project to learn more about the Scrapy framework and to demonstrate how a customer can monitor an unsupported framework such as Scrapy using the Python Agent API.
+
+## Basic Instrumentation using Agent Background Tasks
+
+A trivial example of how a customer can monitor their Scrapy application is to use the background task decorator with the New Relic Python agent API. Consider the following Spider that scrapes content from [Quotes to Scrape:](https://quotes.toscrape.com)
 
 ``` python
 import scrapy
@@ -24,10 +28,10 @@ class QuotesSpider(scrapy.Spider):
             yield response.follow(a, callback=self.parse)
 ```
 
-To monitor this Spider using New Relic, we just need to add three additional lines of code!
+
+To add basic instrumentation using the New Relic Python agent, we just need to add three additional lines of code!
 
 ``` python
-
 import newrelic.agent
 newrelic.agent.initialize('newrelic.ini')
 
@@ -51,18 +55,19 @@ class QuotesSpider(scrapy.Spider):
 
         for a in response.css('li.next a'):
             yield response.follow(a, callback=self.parse)
-
 ```
 
-The `initialize` method is used to initialize the agent with your specified newrelic.ini configuration file.
+In the example above, the `initialize` method is used to initialize the agent with the specified newrelic.ini configuration file. The `@newrelic.agent.background_task()` decorator is used to instrument the parse function as a background task. This transaction is then displayed as a non-web transactions in the APM UI and separated from web transactions.
 
-The `@newrelic.agent.background_task()` decorator is used when you want to instrument background tasks or other non-web transactions. These transactions are displayed as non-web transactions in the APM UI and separated from web transactions.
+## Advanced Instrumentation using Scrapy Extensions
 
-## New Relic Extension Example
+To go one step further with instrumenting Scrapy applications is to use [Scrapy Extensions](https://docs.scrapy.org/en/latest/topics/extensions.html). The extensions framework built into Scrapy provides a mechanism for inserting your own custom functionality into Scrapy. Extensions are just regular classes that are instantiated at Scrapy startup, when extensions are initialized.
 
-The extensions framework built into Scrapy provides a mechanism for inserting your own custom functionality into Scrapy. Extensions are just regular classes that are instantiated at Scrapy startup, when extensions are initialized. 
+I worked on an extension that collects some statistics and records a New Relic custom event that can be queried using New Relic Insights. Scrapy uses [signals](https://docs.scrapy.org/en/latest/topics/signals.html) to notify when certain events occur. You can catch some of those signals in your Scrapy application using a custom extension to perform tasks or extend Scrapy to add functionality not provided out of the box. 
 
-This project includes an example extension that collects some stats and records a New Relic Custom Event that can be queried using New Relic Insights.
+In my custom New Relic extension, I gather some basic statistics when the Spider is opened, closed, scraped, etc. In the closed method, I send the gathered data using the `record_custom_event` API method.
+
+You can find the custom extension below:
 
 ``` python
 import newrelic.agent
@@ -122,10 +127,16 @@ class NewRelic(object):
         self.inc_value('item_dropped_reasons_count/%s' % reason, spider=spider)
 ```
 
-## Setup
+The above example includes only a few of the signal events available. For a full list of signals go to: [https://docs.scrapy.org/en/latest/topics/signals.html](https://docs.scrapy.org/en/latest/topics/signals.html) 
 
-1. Clone the repo.
-2. Install the requirements. `pip install -r requirements.txt`
-3. Update `newrelic.ini` with your license key.
+ 
+## Testing the Project
+
+ 
+To try this project, follow these steps:
+
+1. Clone the repo: `git clone https://github.com/AnthonyBloomer/nrscrapy.git`
+2. Install the requirements. Run `pip install -r requirements.txt`
+3. Update `newrelic.ini` with your license key or export your license key as an environment variable.
 4. Run `cd tutorial`
 5. Run `scrapy crawl quotes`
